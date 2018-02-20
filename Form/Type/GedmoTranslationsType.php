@@ -20,20 +20,31 @@ use Symfony\Component\Form\AbstractType,
  */
 class GedmoTranslationsType extends AbstractType
 {
+    /** @var GedmoTranslationsListener */
     private $translationsListener;
+
+    /** @var GedmoTranslationForm */
     private $translationForm;
+
+    /** @var array */
     private $locales;
+
+    /** @var bool */
     private $required;
 
     /**
      *
-     * @param \A2lix\TranslationFormBundle\Form\EventListener\GedmoTranslationsListener $translationsListener
-     * @param \A2lix\TranslationFormBundle\TranslationForm\GedmoTranslationForm $translationForm
-     * @param type $locales
-     * @param type $required
+     * @param GedmoTranslationsListener $translationsListener
+     * @param GedmoTranslationForm $translationForm
+     * @param array $locales
+     * @param bool $required
      */
-    public function __construct(GedmoTranslationsListener $translationsListener, GedmoTranslationForm $translationForm, $locales, $required)
-    {
+    public function __construct(
+        GedmoTranslationsListener $translationsListener,
+        GedmoTranslationForm $translationForm,
+        $locales,
+        $required
+    ) {
         $this->translationsListener = $translationsListener;
         $this->translationForm = $translationForm;
         $this->locales = $locales;
@@ -49,24 +60,44 @@ class GedmoTranslationsType extends AbstractType
 
         } else {
             if (!$options['translatable_class']) {
-                throw new \Exception("If you want include the default locale with translations locales, you need to fill the 'translatable_class' option");
+                throw new \Exception(
+                    "If you want include the default locale with translations "
+                    ."locales, you need to fill the 'translatable_class' option"
+                );
             }
 
-            $childrenOptions = $this->translationForm->getChildrenOptions($options['translatable_class'], $options);
-            $defaultLocale = (array) $this->translationForm->getGedmoTranslatableListener()->getDefaultLocale();
+            $childrenOptions = $this->translationForm->getChildrenOptions(
+                $options['translatable_class'], $options
+            );
+            foreach ($childrenOptions as $locale => $fields) {
+                foreach ($fields as $name => $field) {
+                    if (isset($field['max_length'])) {
+                        if (!isset($field['attr'])) {
+                            $childrenOptions[$locale][$name]['attr'] = [];
+                        }
+                        $childrenOptions[$locale][$name]['attr']['max_length'] =
+                            $field['max_length'];
+                        unset($childrenOptions[$locale][$name]['max_length']);
+                    }
+                }
+            }
 
-            $builder->add('defaultLocale', 'a2lix_translationsLocales_gedmo', array(
+            $defaultLocale = (array) $this->translationForm
+                ->getGedmoTranslatableListener()->getDefaultLocale();
+
+            $builder->add('defaultLocale', GedmoTranslationsLocalesType::class, [
                 'locales' => $defaultLocale,
                 'fields_options' => $childrenOptions,
                 'inherit_data' => true,
-            ));
+            ]);
 
-            $builder->add($builder->getName(), 'a2lix_translationsLocales_gedmo', array(
+            $builder->add($builder->getName(), GedmoTranslationsLocalesType::class, [
                 'locales' => array_diff($options['locales'], $defaultLocale),
                 'fields_options' => $childrenOptions,
                 'inherit_data' => false,
-                'translation_class' => $this->translationForm->getTranslationClass($options['translatable_class'])
-            ));
+                'translation_class' => $this->translationForm
+                    ->getTranslationClass($options['translatable_class'])
+            ]);
         }
     }
 
