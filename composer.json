@@ -15,7 +15,9 @@
         }
     ],
     "require": {
-        "symfony/symfony": ">=2.3"
+        "roave/security-advisories": "dev-master",
+        "symfony/form": "^2.8 || ^3.2 || ^4.0",
+        "symfony/options-resolver": "^2.8 || ^3.2 || ^4.0"
     },
     "suggest": {
         "a2lix/i18n-doctrine-bundle": "For A2lix strategy",
