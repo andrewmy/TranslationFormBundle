@@ -72,6 +72,19 @@ abstract class TranslationForm implements TranslationFormInterface
             }
         }
 
+        foreach ($childrenOptions as $locale => $fields) {
+            foreach ($fields as $name => $field) {
+                if (isset($field['max_length'])) {
+                    if (!isset($field['attr'])) {
+                        $childrenOptions[$locale][$name]['attr'] = [];
+                    }
+                    $childrenOptions[$locale][$name]['attr']['max_length'] =
+                        $field['max_length'];
+                    unset($childrenOptions[$locale][$name]['max_length']);
+                }
+            }
+        }
+
         return $childrenOptions;
     }
 

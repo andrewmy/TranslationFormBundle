@@ -69,18 +69,6 @@ class GedmoTranslationsType extends AbstractType
             $childrenOptions = $this->translationForm->getChildrenOptions(
                 $options['translatable_class'], $options
             );
-            foreach ($childrenOptions as $locale => $fields) {
-                foreach ($fields as $name => $field) {
-                    if (isset($field['max_length'])) {
-                        if (!isset($field['attr'])) {
-                            $childrenOptions[$locale][$name]['attr'] = [];
-                        }
-                        $childrenOptions[$locale][$name]['attr']['max_length'] =
-                            $field['max_length'];
-                        unset($childrenOptions[$locale][$name]['max_length']);
-                    }
-                }
-            }
 
             $defaultLocale = (array) $this->translationForm
                 ->getGedmoTranslatableListener()->getDefaultLocale();
